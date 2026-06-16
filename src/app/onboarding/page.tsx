@@ -454,12 +454,14 @@ export default function OnboardingPage() {
   };
 
   // Validation logic for each step
+  // Validation logic for each step
   const getCanProceed = () => {
     switch (step) {
       case 0: // Age
         return data.age >= 10 && data.age <= 100;
       case 1: // Gender
-        return data.gender !== "";
+        // Fix: Check if gender has a valid value, not if it's an empty string
+        return data.gender !== undefined && data.gender !== null;
       case 2: // Height
         return data.height >= 100 && data.height <= 250;
       case 3: // Weight
