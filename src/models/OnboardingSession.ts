@@ -3,6 +3,7 @@ import mongoose, { Schema, type Document } from "mongoose";
 export interface IOnboardingSession extends Document {
   data: {
     name: string;
+    email: string;
     age: number;
     gender: string;
     height: number;
@@ -24,7 +25,8 @@ export interface IOnboardingSession extends Document {
 const OnboardingSessionSchema = new Schema<IOnboardingSession>(
   {
     data: {
-      name: { type: String, required: true },
+      name: { type: String },
+      email: { type: String, required: true, default: "unknown@example.com" },
       age: { type: Number, required: true },
       gender: { type: String, required: true },
       height: { type: Number, required: true },

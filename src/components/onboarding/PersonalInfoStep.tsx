@@ -2,6 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import type { OnboardingData } from "@/types";
 
 interface StepProps {
@@ -17,7 +18,7 @@ const genderOptions = [
 
 export function PersonalInfoStep({ data, onChange }: StepProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="space-y-2">
         <Label htmlFor="name">Full Name</Label>
         <Input
@@ -28,19 +29,23 @@ export function PersonalInfoStep({ data, onChange }: StepProps) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="age">Age</Label>
-          <Input
-            id="age"
-            type="number"
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label>Age</Label>
+            <span className="text-xl font-bold text-primary">{data.age} years</span>
+          </div>
+          <Slider
             min={10}
             max={100}
-            value={data.age}
-            onChange={(e) => onChange({ age: Number(e.target.value) })}
+            step={1}
+            value={[data.age]}
+            onValueChange={([val]) => onChange({ age: val })}
+            className="py-4"
           />
         </div>
-        <div className="space-y-2">
+
+        <div className="space-y-4">
           <Label>Gender</Label>
           <div className="flex gap-2">
             {genderOptions.map((opt) => (
@@ -48,52 +53,60 @@ export function PersonalInfoStep({ data, onChange }: StepProps) {
                 key={opt.value}
                 type="button"
                 onClick={() => onChange({ gender: opt.value })}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg border text-sm font-medium transition-all cursor-pointer ${
-                  data.gender === opt.value
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border hover:border-primary/40 text-muted-foreground hover:text-foreground"
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-medium transition-all cursor-pointer ${data.gender === opt.value
+                    ? "border-primary bg-primary/10 text-primary shadow-sm"
+                    : "border-border hover:border-primary/40 text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                  }`}
               >
-                <span>{opt.emoji}</span>
+                <span className="text-lg">{opt.emoji}</span>
                 <span>{opt.label}</span>
               </button>
             ))}
           </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="height">Height (cm)</Label>
-          <Input
-            id="height"
-            type="number"
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label>Height</Label>
+            <span className="text-xl font-bold text-primary">{data.height} cm</span>
+          </div>
+          <Slider
             min={100}
             max={250}
-            value={data.height}
-            onChange={(e) => onChange({ height: Number(e.target.value) })}
+            step={1}
+            value={[data.height]}
+            onValueChange={([val]) => onChange({ height: val })}
+            className="py-4"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="weight">Weight (kg)</Label>
-          <Input
-            id="weight"
-            type="number"
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label>Current Weight</Label>
+            <span className="text-xl font-bold text-primary">{data.weight} kg</span>
+          </div>
+          <Slider
             min={30}
-            max={300}
-            value={data.weight}
-            onChange={(e) => onChange({ weight: Number(e.target.value) })}
+            max={200}
+            step={1}
+            value={[data.weight]}
+            onValueChange={([val]) => onChange({ weight: val })}
+            className="py-4"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="targetWeight">Target (kg)</Label>
-          <Input
-            id="targetWeight"
-            type="number"
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label>Target Weight</Label>
+            <span className="text-xl font-bold text-primary">{data.targetWeight} kg</span>
+          </div>
+          <Slider
             min={30}
-            max={300}
-            value={data.targetWeight}
-            onChange={(e) => onChange({ targetWeight: Number(e.target.value) })}
+            max={200}
+            step={1}
+            value={[data.targetWeight]}
+            onValueChange={([val]) => onChange({ targetWeight: val })}
+            className="py-4"
           />
         </div>
       </div>

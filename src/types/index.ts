@@ -1,6 +1,7 @@
 export interface OnboardingData {
   // Personal Information
   name: string;
+  email: string;
   age: number;
   gender: "male" | "female" | "other";
   height: number; // cm

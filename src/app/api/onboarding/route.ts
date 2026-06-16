@@ -9,13 +9,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { data } = body;
 
-    if (!data || !data.name || !data.age || !data.gender) {
+    if (!data || !data.age || !data.gender) {
       return NextResponse.json(
         { error: "Missing required onboarding data" },
         { status: 400 }
       );
     }
-
+    console.log(data)
     const session = await OnboardingSession.create({ data });
 
     return NextResponse.json(
