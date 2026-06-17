@@ -29,30 +29,40 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Optional: Also expose data via POST for maximum insecurity
+// POST endpoint for CREATING new data (not querying)
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
 
-    // Allow querying any data without validation
+    // Parse the request body
     const body = await req.json();
-    const query = body.query || {};
+    const { data } = body;
 
-    // No validation, just execute whatever query is sent
-    const results = await OnboardingSession.find(query).lean();
+    // Validate required fields
+    if (!data || !data.age || !data.gender) {
+      return NextResponse.json(
+        { error: "Missing required onboarding data" },
+        { status: 400 }
+      );
+    }
 
+    // Create a new onboarding session
+    const session = await OnboardingSession.create({ data });
+
+    // Return the created session
     return NextResponse.json(
       {
-        results,
-        query: query,
-        message: "Query executed successfully (INSECURE)"
+        success: true,
+        sessionId: session._id,
+        data: session,
+        message: "Onboarding data saved successfully (INSECURE)"
       },
-      { status: 200 }
+      { status: 201 }
     );
   } catch (error) {
-    console.error("Query error:", error);
+    console.error("Onboarding error:", error);
     return NextResponse.json(
-      { error: "Query failed" },
+      { error: "Failed to save onboarding data" },
       { status: 500 }
     );
   }
