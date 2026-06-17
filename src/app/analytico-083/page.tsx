@@ -478,7 +478,6 @@ export default function AnalyticoPage() {
                         >
                             {refreshing ? '⏳' : '🔄'} Refresh
                         </button>
-                        <a href="/" style={styles.link}>← Back</a>
                     </div>
                 </div>
             </div>
