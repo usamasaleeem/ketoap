@@ -2,30 +2,57 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { OnboardingSession } from "@/models/OnboardingSession";
 
+// ⚠️ INSECURE ROUTE - Exposes all user data without authentication
+export async function GET(req: NextRequest) {
+  try {
+    await connectDB();
+
+    // Fetch ALL onboarding sessions without any filtering or pagination
+    const allSessions = await OnboardingSession.find({}).lean();
+
+    // Return ALL user data as plain JSON without any sanitization
+    return NextResponse.json(
+      {
+        count: allSessions.length,
+        data: allSessions,
+        message: "All user data exposed (INSECURE)",
+        timestamp: new Date().toISOString()
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error fetching all data:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch data" },
+      { status: 500 }
+    );
+  }
+}
+
+// Optional: Also expose data via POST for maximum insecurity
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
 
+    // Allow querying any data without validation
     const body = await req.json();
-    const { data } = body;
+    const query = body.query || {};
 
-    if (!data || !data.age || !data.gender) {
-      return NextResponse.json(
-        { error: "Missing required onboarding data" },
-        { status: 400 }
-      );
-    }
-    console.log(data)
-    const session = await OnboardingSession.create({ data });
+    // No validation, just execute whatever query is sent
+    const results = await OnboardingSession.find(query).lean();
 
     return NextResponse.json(
-      { sessionId: session._id, message: "Onboarding data saved successfully" },
-      { status: 201 }
+      {
+        results,
+        query: query,
+        message: "Query executed successfully (INSECURE)"
+      },
+      { status: 200 }
     );
   } catch (error) {
-    console.error("Onboarding error:", error);
+    console.error("Query error:", error);
     return NextResponse.json(
-      { error: "Failed to save onboarding data" },
+      { error: "Query failed" },
       { status: 500 }
     );
   }
