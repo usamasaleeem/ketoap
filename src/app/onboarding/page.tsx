@@ -61,7 +61,6 @@ const STEPS = [
   { title: "Diet Preference", description: "Choose your diet style" },
   { title: "Restrictions", description: "Any allergies or conditions?" },
   { title: "Food Preferences", description: "What do you love to eat?" },
-  { title: "Your Health Summary", description: "Here's what we've learned about you" },
   { title: "Where to send?", description: "We'll send your plan here" },
 ];
 
@@ -529,8 +528,7 @@ export default function OnboardingPage() {
               {step === 7 && <DietStep data={data} onChange={updateData} />}
               {step === 8 && <RestrictionsStep data={data} onChange={updateData} />}
               {step === 9 && <FoodPreferencesStep data={data} onChange={updateData} />}
-              {step === 10 && <HealthSummaryStep data={data} />}
-              {step === 11 && <EmailStep data={data} onChange={updateData} />}
+              {step === 10 && <EmailStep data={data} onChange={updateData} />}
             </motion.div>
           </AnimatePresence>
         </div>
