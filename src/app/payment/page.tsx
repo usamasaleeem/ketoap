@@ -108,7 +108,7 @@ export default function PaymentPage() {
   if (!sessionId) return null;
 
   const totalMeals = (planDetails?.planLength || 7) * (planDetails?.mealsPerDay || 3);
-  const price = 2.99;
+  const price = 4.99;
   const savings = 97; // Compared to similar plans
 
   return (

@@ -62,7 +62,7 @@ const STEPS = [
   { title: "Diet Preference", description: "Choose your diet style" },
   { title: "Restrictions", description: "Any allergies or conditions?" },
   { title: "Food Preferences", description: "What do you love to eat?" },
-  { title: "Enter your email", description: "Enter your email to finish setup" },
+  { title: "Your Meal Plan Is Ready", description: "Enter your email to finish setup" },
 ];
 
 const defaultData: OnboardingData = {

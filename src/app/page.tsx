@@ -298,7 +298,7 @@ export default function LandingPage() {
               </Button>
             </Link>
             <p className="text-sm text-muted-foreground mt-4">
-              One-time payment of $2.99 • Instant delivery
+              One-time payment of $4.99 • Instant delivery
             </p>
           </div>
         </motion.div>
