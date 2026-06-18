@@ -3,6 +3,8 @@
 
 import { useState, useRef } from "react";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Plus, Minus } from "lucide-react";
 import type { OnboardingData } from "@/types";
 
 interface StepProps {
@@ -56,16 +58,48 @@ export function AgeStep({ data, onChange }: StepProps) {
         onChange({ age: newValue });
     };
 
+    const handleIncrement = () => {
+        if (data.age < MAX) {
+            onChange({ age: data.age + 1 });
+        }
+    };
+
+    const handleDecrement = () => {
+        if (data.age > MIN) {
+            onChange({ age: data.age - 1 });
+        }
+    };
+
     const percentage = ((data.age - MIN) / (MAX - MIN)) * 100;
 
     return (
         <div className="space-y-8">
-
-
             <div className="pt-8">
-                <div className="flex items-center justify-center mb-8">
-                    <span className="text-6xl font-bold text-primary">{data.age}</span>
-                    <span className="text-2xl text-muted-foreground ml-2">years</span>
+                <div className="flex items-center justify-center gap-6 mb-8">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-12 w-12 rounded-full"
+                        onClick={handleDecrement}
+                        disabled={data.age <= MIN}
+                    >
+                        <Minus className="h-6 w-6" />
+                    </Button>
+
+                    <div className="flex items-center">
+                        <span className="text-6xl font-bold text-primary">{data.age}</span>
+                        <span className="text-2xl text-muted-foreground ml-2">years</span>
+                    </div>
+
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-12 w-12 rounded-full"
+                        onClick={handleIncrement}
+                        disabled={data.age >= MAX}
+                    >
+                        <Plus className="h-6 w-6" />
+                    </Button>
                 </div>
 
                 <div
