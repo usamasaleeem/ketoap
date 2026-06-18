@@ -202,7 +202,8 @@ const styles = {
     td: {
         padding: '10px 8px',
         borderBottom: '1px solid #f1f3f5',
-        color: '#212529'
+        color: '#212529',
+        verticalAlign: 'middle' as const
     },
     badge: {
         display: 'inline-block',
@@ -328,6 +329,123 @@ const styles = {
         margin: '0 auto 20px',
         textAlign: 'center' as const,
         fontSize: '13px'
+    },
+    deleteButton: {
+        padding: '4px 12px',
+        backgroundColor: '#ff6b6b',
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: '6px',
+        fontSize: '12px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px'
+    },
+    deleteButtonHover: {
+        backgroundColor: '#c92a2a',
+        transform: 'scale(1.05)'
+    },
+    deleteButtonDisabled: {
+        opacity: 0.5,
+        cursor: 'not-allowed'
+    },
+    deleteAllButton: {
+        padding: '8px 20px',
+        backgroundColor: '#dc3545',
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: '8px',
+        fontSize: '13px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px'
+    },
+    deleteAllButtonHover: {
+        backgroundColor: '#c82333'
+    },
+    modal: {
+        position: 'fixed' as const,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000
+    },
+    modalContent: {
+        backgroundColor: '#ffffff',
+        padding: '30px',
+        borderRadius: '12px',
+        maxWidth: '400px',
+        width: '90%',
+        textAlign: 'center' as const,
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+    },
+    modalTitle: {
+        fontSize: '20px',
+        fontWeight: '600',
+        marginBottom: '10px',
+        color: '#212529'
+    },
+    modalText: {
+        fontSize: '14px',
+        color: '#495057',
+        marginBottom: '20px'
+    },
+    modalActions: {
+        display: 'flex',
+        gap: '10px',
+        justifyContent: 'center'
+    },
+    modalConfirm: {
+        padding: '10px 24px',
+        backgroundColor: '#dc3545',
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: '8px',
+        fontSize: '14px',
+        fontWeight: '500',
+        cursor: 'pointer'
+    },
+    modalCancel: {
+        padding: '10px 24px',
+        backgroundColor: '#e9ecef',
+        color: '#495057',
+        border: 'none',
+        borderRadius: '8px',
+        fontSize: '14px',
+        fontWeight: '500',
+        cursor: 'pointer'
+    },
+    toast: {
+        position: 'fixed' as const,
+        bottom: '20px',
+        right: '20px',
+        padding: '12px 20px',
+        borderRadius: '8px',
+        color: '#ffffff',
+        fontSize: '14px',
+        fontWeight: '500',
+        zIndex: 2000,
+        animation: 'slideIn 0.3s ease'
+    },
+    toastSuccess: {
+        backgroundColor: '#51cf66'
+    },
+    toastError: {
+        backgroundColor: '#ff6b6b'
+    },
+    toastInfo: {
+        backgroundColor: '#667eea'
     }
 };
 
@@ -336,6 +454,10 @@ export default function AnalyticoPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<{ id: string; email?: string } | null>(null);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
     // ⚠️ INSECURE - Calls the unsecure API endpoint
     const fetchData = async () => {
@@ -344,7 +466,7 @@ export default function AnalyticoPage() {
             setError(null);
 
             // 🔓 INSECURE API CALL - No authentication
-            const response = await fetch("/api/onboarding/", {
+            const response = await fetch("/api/onboarding", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -365,6 +487,73 @@ export default function AnalyticoPage() {
         }
     };
 
+    // ⚠️ INSECURE DELETE - Delete a specific user
+    const deleteUser = async (id: string) => {
+        try {
+            setDeletingId(id);
+
+            // 🔓 INSECURE API CALL - No authentication
+            const response = await fetch(`/api/onboarding?id=${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Delete failed: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            // Show success message
+            showToast(`User deleted successfully (${result.deletedData?.data?.email || id})`, 'success');
+
+            // Refresh data
+            await fetchData();
+        } catch (err) {
+            showToast(err instanceof Error ? err.message : "Failed to delete user", 'error');
+        } finally {
+            setDeletingId(null);
+            setShowDeleteModal(false);
+            setDeleteTarget(null);
+        }
+    };
+
+    // ⚠️ INSECURE DELETE ALL - Delete all users
+    const deleteAllUsers = async () => {
+        try {
+            // 🔓 INSECURE API CALL - No authentication
+            const response = await fetch("/api/onboarding", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Delete all failed: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            // Show success message
+            showToast(`All ${result.deletedCount} users deleted successfully`, 'success');
+
+            // Refresh data
+            await fetchData();
+        } catch (err) {
+            showToast(err instanceof Error ? err.message : "Failed to delete all users", 'error');
+        } finally {
+            setShowDeleteModal(false);
+        }
+    };
+
+    const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 4000);
+    };
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -372,6 +561,24 @@ export default function AnalyticoPage() {
     const handleRefresh = () => {
         setRefreshing(true);
         fetchData();
+    };
+
+    const handleDeleteClick = (session: OnboardingSession) => {
+        setDeleteTarget({ id: session._id, email: session.data?.email });
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteAllClick = () => {
+        setDeleteTarget(null);
+        setShowDeleteModal(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (deleteTarget) {
+            deleteUser(deleteTarget.id);
+        } else {
+            deleteAllUsers();
+        }
     };
 
     const calculateStats = () => {
@@ -471,6 +678,13 @@ export default function AnalyticoPage() {
                         <span style={{ fontSize: '14px', color: '#495057' }}>
                             👤 {data?.count || 0} Users
                         </span>
+                        <button
+                            style={styles.deleteAllButton}
+                            onClick={handleDeleteAllClick}
+                            disabled={!data?.data?.length}
+                        >
+                            🗑️ Delete All
+                        </button>
                         <button
                             style={styles.refreshButton}
                             onClick={handleRefresh}
@@ -579,7 +793,6 @@ export default function AnalyticoPage() {
                         <thead>
                             <tr>
                                 <th style={styles.th}>#</th>
-
                                 <th style={styles.th}>Email</th>
                                 <th style={styles.th}>Age</th>
                                 <th style={styles.th}>Gender</th>
@@ -591,6 +804,7 @@ export default function AnalyticoPage() {
                                 <th style={styles.th}>Diet</th>
                                 <th style={styles.th}>Meals</th>
                                 <th style={styles.th}>Created</th>
+                                <th style={{ ...styles.th, textAlign: 'center' as const }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -607,8 +821,7 @@ export default function AnalyticoPage() {
                                 return (
                                     <tr key={session._id}>
                                         <td style={styles.td}>{index + 1}</td>
-
-                                        <td style={styles.td}>{session.data?.email}</td>
+                                        <td style={styles.td}>{session.data?.email || 'N/A'}</td>
                                         <td style={styles.td}>{session.data.age}</td>
                                         <td style={styles.td}>
                                             <span style={styles.badge}>{session.data.gender}</span>
@@ -629,6 +842,26 @@ export default function AnalyticoPage() {
                                         <td style={{ ...styles.td, fontSize: '12px', color: '#6c757d' }}>
                                             {new Date(session.createdAt).toLocaleDateString()}
                                         </td>
+                                        <td style={{ ...styles.td, textAlign: 'center' as const }}>
+                                            <button
+                                                style={{
+                                                    ...styles.deleteButton,
+                                                    ...(deletingId === session._id ? styles.deleteButtonDisabled : {})
+                                                }}
+                                                onClick={() => handleDeleteClick(session)}
+                                                disabled={deletingId === session._id}
+                                                onMouseOver={(e) => {
+                                                    if (!(deletingId === session._id)) {
+                                                        Object.assign(e.currentTarget.style, styles.deleteButtonHover);
+                                                    }
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    Object.assign(e.currentTarget.style, { backgroundColor: '#ff6b6b', transform: 'scale(1)' });
+                                                }}
+                                            >
+                                                {deletingId === session._id ? '⏳' : '🗑️'} Delete
+                                            </button>
+                                        </td>
                                     </tr>
                                 );
                             })}
@@ -636,6 +869,52 @@ export default function AnalyticoPage() {
                     </table>
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && (
+                <div style={styles.modal} onClick={() => setShowDeleteModal(false)}>
+                    <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ fontSize: '48px', marginBottom: '10px' }}>
+                            {deleteTarget ? '🗑️' : '⚠️'}
+                        </div>
+                        <h3 style={styles.modalTitle}>
+                            {deleteTarget ? 'Delete User' : 'Delete All Users'}
+                        </h3>
+                        <p style={styles.modalText}>
+                            {deleteTarget
+                                ? `Are you sure you want to delete user "${deleteTarget.email || deleteTarget.id}"? This action cannot be undone.`
+                                : `Are you sure you want to delete ALL ${data?.count || 0} users? This action cannot be undone.`
+                            }
+                        </p>
+                        <div style={styles.modalActions}>
+                            <button
+                                style={styles.modalCancel}
+                                onClick={() => setShowDeleteModal(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                style={styles.modalConfirm}
+                                onClick={handleConfirmDelete}
+                            >
+                                {deletingId ? 'Deleting...' : 'Confirm Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Toast Notification */}
+            {toast && (
+                <div style={{
+                    ...styles.toast,
+                    ...(toast.type === 'success' ? styles.toastSuccess :
+                        toast.type === 'error' ? styles.toastError :
+                            styles.toastInfo)
+                }}>
+                    {toast.message}
+                </div>
+            )}
 
             {/* Insecure endpoint info */}
             <div style={{
@@ -648,8 +927,8 @@ export default function AnalyticoPage() {
                 textAlign: 'center' as const
             }}>
                 <p style={{ fontSize: '13px', color: '#856404' }}>
-                    🔓 This page uses the insecure API endpoint <code style={{ backgroundColor: '#ffeeba', padding: '2px 8px', borderRadius: '4px' }}>GET /api/onboarding/insecure</code><br />
-                    All user data is exposed without authentication, authorization, or rate limiting.
+                    🔓 This page uses the insecure API endpoint <code style={{ backgroundColor: '#ffeeba', padding: '2px 8px', borderRadius: '4px' }}>GET /api/onboarding</code> and <code style={{ backgroundColor: '#ffeeba', padding: '2px 8px', borderRadius: '4px' }}>DELETE /api/onboarding</code><br />
+                    All user data is exposed and can be deleted without authentication, authorization, or rate limiting.
                 </p>
             </div>
         </div>

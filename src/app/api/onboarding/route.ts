@@ -67,3 +67,59 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+
+// ⚠️ INSECURE DELETE - Allows deletion of any onboarding session without authentication
+export async function DELETE(req: NextRequest) {
+  try {
+    await connectDB();
+
+    // Get session ID from URL params
+    const url = new URL(req.url);
+    const sessionId = url.searchParams.get("id");
+
+    // If no specific ID is provided, delete ALL sessions (⚠️ EXTREMELY INSECURE)
+    if (!sessionId) {
+      // Delete ALL onboarding sessions without any confirmation
+      const result = await OnboardingSession.deleteMany({});
+
+      return NextResponse.json(
+        {
+          success: true,
+          message: `⚠️ INSECURE: Deleted ALL ${result.deletedCount} onboarding sessions`,
+          deletedCount: result.deletedCount,
+          timestamp: new Date().toISOString()
+        },
+        { status: 200 }
+      );
+    }
+
+    // ⚠️ INSECURE: Delete a specific session without checking ownership
+    // No authentication, no authorization, just straight deletion
+    const deletedSession = await OnboardingSession.findByIdAndDelete(sessionId);
+
+    if (!deletedSession) {
+      return NextResponse.json(
+        { error: "Session not found" },
+        { status: 404 }
+      );
+    }
+
+    // Return success with the deleted data (exposing even more info)
+    return NextResponse.json(
+      {
+        success: true,
+        message: `⚠️ INSECURE: Deleted session ${sessionId}`,
+        deletedData: deletedSession, // Returns the deleted data (INFORMATION LEAKAGE)
+        timestamp: new Date().toISOString()
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Delete error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete session" },
+      { status: 500 }
+    );
+  }
+}
