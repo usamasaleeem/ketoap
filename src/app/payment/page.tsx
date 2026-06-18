@@ -173,10 +173,10 @@ export default function PaymentPage() {
 
 
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                Your AI Meal Plan
+                Get Your Meal Plan
               </CardTitle>
               <CardDescription className="text-base">
-                Get your personalized keto meal plan in minutes
+                Get your personalized  meal plan 
               </CardDescription>
             </CardHeader>
 
