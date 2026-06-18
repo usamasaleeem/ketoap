@@ -109,7 +109,7 @@ export default function PaymentPage() {
 
   const totalMeals = (planDetails?.planLength || 7) * (planDetails?.mealsPerDay || 3);
   const price = 4.99;
-  const savings = 97; // Compared to similar plans
+  const savings = 75; // Compared to similar plans
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
@@ -247,7 +247,7 @@ export default function PaymentPage() {
                     <span className="text-xl text-muted-foreground ml-1">USD</span>
                   </div>
                   <div className="text-left">
-                    <div className="line-through text-sm text-muted-foreground">$99.99</div>
+                    <div className="line-through text-sm text-muted-foreground">$19.99</div>
                     <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/20">
                       Save ${savings}%
                     </Badge>
