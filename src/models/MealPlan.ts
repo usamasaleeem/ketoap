@@ -2,7 +2,6 @@ import mongoose, { Schema, type Document } from "mongoose";
 
 export interface IMealPlan extends Document {
   sessionId: mongoose.Types.ObjectId;
-  paymentId: mongoose.Types.ObjectId;
   userData: Record<string, unknown>;
   plan: {
     summary: {
@@ -48,7 +47,7 @@ export interface IMealPlan extends Document {
 const MealPlanSchema = new Schema<IMealPlan>(
   {
     sessionId: { type: Schema.Types.ObjectId, ref: "OnboardingSession", required: true },
-    paymentId: { type: Schema.Types.ObjectId, ref: "Payment", required: true },
+
     userData: { type: Schema.Types.Mixed, required: true },
     plan: { type: Schema.Types.Mixed, required: true },
   },

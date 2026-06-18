@@ -19,9 +19,8 @@ export default function GeneratingPage() {
 
   useEffect(() => {
     const sessionId = sessionStorage.getItem("sessionId");
-    const paymentId = sessionStorage.getItem("paymentId");
 
-    if (!sessionId || !paymentId) {
+    if (!sessionId) {
       router.push("/onboarding");
       return;
     }
@@ -40,7 +39,7 @@ export default function GeneratingPage() {
         const response = await fetch("/api/generate-plan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId, paymentId }),
+          body: JSON.stringify({ sessionId }),
         });
 
         const result = await response.json();
@@ -138,8 +137,8 @@ export default function GeneratingPage() {
             <motion.div
               key={step.label}
               className={`flex items-center gap-3 p-3 rounded-lg transition-all ${i <= currentStep
-                  ? "bg-primary/5 text-foreground"
-                  : "text-muted-foreground/50"
+                ? "bg-primary/5 text-foreground"
+                : "text-muted-foreground/50"
                 }`}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}

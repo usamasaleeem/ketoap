@@ -11,23 +11,16 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     const body = await req.json();
-    const { sessionId, paymentId } = body;
+    const { sessionId } = body;
 
-    if (!sessionId || !paymentId) {
+    if (!sessionId) {
       return NextResponse.json(
         { error: "Missing session ID or payment ID" },
         { status: 400 }
       );
     }
 
-    // Verify payment is completed
-    const payment = await Payment.findById(paymentId);
-    if (!payment || payment.status !== "completed") {
-      return NextResponse.json(
-        { error: "Payment not verified. Please complete payment first." },
-        { status: 403 }
-      );
-    }
+
 
     // Check if plan already exists
     const existingPlan = await MealPlan.findOne({ sessionId });
@@ -53,7 +46,7 @@ export async function POST(req: NextRequest) {
     // Save to database
     const mealPlan = await MealPlan.create({
       sessionId,
-      paymentId,
+
       userData: session.data,
       plan: planData,
     });
