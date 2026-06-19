@@ -62,7 +62,7 @@ const STEPS = [
   { title: "Diet Preference", description: "Choose your diet style" },
   { title: "Restrictions", description: "Any allergies or conditions?" },
   { title: "Food Preferences", description: "What do you love to eat?" },
-  { title: "Your Meal Plan Is Ready", description: "Enter your email to finish setup" },
+  { title: "Your Email", description: "Enter your email to get started" },
 ];
 
 const defaultData: OnboardingData = {
@@ -202,13 +202,18 @@ export default function OnboardingPage() {
   };
 
   const handleGeneratingComplete = () => {
-    // Move to email step
-    setStep(STEPS.length - 1); // Email step is last
+    // After generation is complete, redirect to payment
     setIsGenerating(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    router.push("/payment");
   };
 
   const handleSubmit = async () => {
+    // Validate email first
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const response = await fetch("/api/onboarding", {
@@ -221,13 +226,15 @@ export default function OnboardingPage() {
       if (response.ok) {
         sessionStorage.setItem("sessionId", result.sessionId);
         sessionStorage.setItem("onboardingData", JSON.stringify(data));
-        router.push("/payment");
+        // After saving, show generating animation
+        setIsSubmitting(false);
+        setIsGenerating(true);
       } else {
         alert(result.error || "Something went wrong");
+        setIsSubmitting(false);
       }
     } catch {
       alert("Failed to save data. Please try again.");
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -245,9 +252,9 @@ export default function OnboardingPage() {
         return data.weight >= 30 && data.weight <= 200;
       case 4: // Target Weight
         return data.targetWeight >= 30 && data.targetWeight <= 200;
-      case 9: // Food Preferences (last step before generation) - always proceed
+      case 9: // Food Preferences - always proceed
         return true;
-      case 10: // Email (last step)
+      case 10: // Email - validate email
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email);
       default:
         return true;
@@ -255,13 +262,7 @@ export default function OnboardingPage() {
   };
 
   const isLastStep = step === STEPS.length - 1;
-  const isFoodPreferencesStep = step === 9; // The step before email
   const canProceed = getCanProceed();
-
-  // Handle "Continue to Email" button click from Food Preferences step
-  const handleGenerateAndContinue = () => {
-    setIsGenerating(true);
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -350,15 +351,7 @@ export default function OnboardingPage() {
               Back
             </Button>
 
-            {isFoodPreferencesStep ? (
-              <Button
-                onClick={handleGenerateAndContinue}
-                className="rounded-full shadow-lg shadow-primary/25 px-8"
-              >
-                Generate My Plan
-                <Sparkles className="size-4 ml-2" />
-              </Button>
-            ) : isLastStep ? (
+            {isLastStep ? (
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting || !canProceed}
@@ -371,8 +364,8 @@ export default function OnboardingPage() {
                   </>
                 ) : (
                   <>
-                    Continue
-                    <ArrowRight className="size-4 ml-1" />
+                    Create My Plan
+                    <Sparkles className="size-4 ml-2" />
                   </>
                 )}
               </Button>
