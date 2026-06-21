@@ -207,37 +207,41 @@ export default function OnboardingPage() {
     router.push("/payment");
   };
 
-  const handleSubmit = async () => {
-    // Validate email first
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      alert("Please enter a valid email address");
-      return;
-    }
+// Update the handleSubmit function to immediately show generating state
+const handleSubmit = async () => {
+  // Validate email first
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    alert("Please enter a valid email address");
+    return;
+  }
 
-    setIsSubmitting(true);
-    try {
-      const response = await fetch("/api/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data }),
-      });
+  // Immediately show generating state
+  setIsGenerating(true);
+  setIsSubmitting(false); // Make sure submitting is false
 
-      const result = await response.json();
-      if (response.ok) {
-        sessionStorage.setItem("sessionId", result.sessionId);
-        sessionStorage.setItem("onboardingData", JSON.stringify(data));
-        // After saving, show generating animation
-        setIsSubmitting(false);
-        setIsGenerating(true);
-      } else {
-        alert(result.error || "Something went wrong");
-        setIsSubmitting(false);
-      }
-    } catch {
-      alert("Failed to save data. Please try again.");
-      setIsSubmitting(false);
+  try {
+    const response = await fetch("/api/onboarding", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data }),
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      sessionStorage.setItem("sessionId", result.sessionId);
+      sessionStorage.setItem("onboardingData", JSON.stringify(data));
+      // Don't set isGenerating here - it's already true
+    } else {
+      // If there's an error, go back to the email step
+      setIsGenerating(false);
+      alert(result.error || "Something went wrong");
     }
-  };
+  } catch {
+    // If there's an error, go back to the email step
+    setIsGenerating(false);
+    alert("Failed to save data. Please try again.");
+  }
+};
 
   // Validation logic for each step
   const getCanProceed = () => {
