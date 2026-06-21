@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const payment = await Payment.create({
       sessionId,
       status: "completed",
-      amount: 4.99,
+      amount: 2.99,
       polarCheckoutId: checkoutId || "direct-checkout",
     });
 
